@@ -8,8 +8,9 @@ from django.utils import timezone
 
 from apps.accounts.models import Membership, Role
 from apps.contacts.models import Contact
-from apps.events.models import Event, Speaker
+from apps.events.models import Event, EventStatus, Speaker
 from apps.events.services import create_event_with_checklist
+from apps.sales.models import Sale
 
 
 class Command(BaseCommand):
@@ -43,6 +44,25 @@ class Command(BaseCommand):
                 title="A song written just for you", speaker=speakers[1], starts_at=now + timedelta(days=10)
             )
             event.checklist.filter(code__in=["roles", "join_link"]).update(done=True)
+
+        # A past session with sales, so the dashboard shows revenue without a Stripe account.
+        if not Event.objects.filter(title="Breathe, laugh, reset").exists():
+            past = create_event_with_checklist(
+                title="Breathe, laugh, reset",
+                speaker=speakers[0],
+                starts_at=timezone.now().replace(minute=0, second=0, microsecond=0) - timedelta(days=7),
+                status=EventStatus.DONE,
+            )
+            past.checklist.update(done=True)
+            for i, (amount, refunded) in enumerate([(9700, 0), (9700, 0), (9700, 9700), (14700, 0)]):
+                Sale.objects.create(
+                    event=past,
+                    stripe_session_id=f"demo_session_{i}",
+                    amount_cents=amount,
+                    refunded_cents=refunded,
+                    currency="eur",
+                    paid_at=past.starts_at + timedelta(days=1, hours=i),
+                )
 
         for i in range(1, 26):
             Contact.objects.get_or_create(

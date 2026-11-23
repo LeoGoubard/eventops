@@ -127,3 +127,30 @@ h2 {
   color: var(--muted);
   text-decoration: line-through;
 }
+
+.sales {
+  margin: 8px 0 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.speakers {
+  margin-bottom: 16px;
+}
+
+.speakers table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.speakers th {
+  text-align: left;
+  font-weight: 500;
+}
+
+.speakers td {
+  text-align: right;
+  padding: 4px 0 4px 16px;
+}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { api, type EventItem, type Me, UnauthorizedError } from "./api";
+import { api, type EventItem, type Me, type SalesLine, type SalesSummary, UnauthorizedError } from "./api";
 
 type State =
   | { kind: "loading" }
   | { kind: "logged-out" }
   | { kind: "error"; message: string }
-  | { kind: "ready"; me: Me; events: EventItem[] };
+  | { kind: "ready"; me: Me; events: EventItem[]; sales: SalesSummary | null };
 
 const dateFormat = new Intl.DateTimeFormat(undefined, {
   weekday: "short",
@@ -15,12 +15,28 @@ const dateFormat = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+function money(line: SalesLine): string {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: line.currency.toUpperCase(),
+  }).format(line.net_cents / 100);
+}
+
+function salesLabel(line: SalesLine): string {
+  return `${line.sales_count} ${line.sales_count === 1 ? "sale" : "sales"} · ${money(line)}`;
+}
+
+// Revenue is only visible to admins and organizers; the API enforces it, this avoids a 403.
+async function loadSales(me: Me): Promise<SalesSummary | null> {
+  return me.role === "admin" || me.role === "organizer" ? api.salesSummary() : null;
+}
+
 export default function App() {
   const [state, setState] = useState<State>({ kind: "loading" });
 
   useEffect(() => {
     Promise.all([api.me(), api.events()])
-      .then(([me, events]) => setState({ kind: "ready", me, events }))
+      .then(async ([me, events]) => setState({ kind: "ready", me, events, sales: await loadSales(me) }))
       .catch((err: unknown) =>
         setState(
           err instanceof UnauthorizedError
@@ -65,6 +81,24 @@ export default function App() {
         <p className="muted">No events yet. Create one from the admin or the API.</p>
       )}
 
+      {state.kind === "ready" && state.sales && state.sales.by_speaker.length > 0 && (
+        <section className="card speakers">
+          <h2>Sales by speaker</h2>
+          <table>
+            <tbody>
+              {state.sales.by_speaker.map((line) => (
+                <tr key={`${line.id}-${line.currency}`}>
+                  <th scope="row">{line.name}</th>
+                  <td>{line.sales_count}</td>
+                  <td>{money(line)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="muted">Net of refunds, synced from Stripe.</p>
+        </section>
+      )}
+
       {state.kind === "ready" && (
         <ul className="events">
           {state.events.map((event) => (
@@ -80,6 +114,13 @@ export default function App() {
                   {event.is_ready ? "Ready to go live" : `${event.readiness_percent}% ready`}
                 </span>
               </div>
+              {state.sales?.by_event
+                .filter((line) => line.id === event.id)
+                .map((line) => (
+                  <p key={line.currency} className="sales">
+                    {salesLabel(line)}
+                  </p>
+                ))}
               <div className="bar" aria-hidden>
                 <div style={{ width: `${event.readiness_percent}%` }} />
               </div>
