@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+db.sqlite3
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+staticfiles/
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+deploy/k8s/secret.yaml

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventops-frontend
+  labels: { app: eventops-frontend }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: eventops-frontend }
+  template:
+    metadata:
+      labels: { app: eventops-frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/leogoubard/eventops-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventops-frontend
+spec:
+  selector: { app: eventops-frontend }
+  ports:
+    - port: 80
+      targetPort: 80
