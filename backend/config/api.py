@@ -5,6 +5,7 @@ from ninja.security import django_auth
 from apps.accounts.permissions import get_role
 from apps.contacts.api import router as contacts_router
 from apps.events.api import router as events_router
+from apps.sales.api import router as sales_router
 
 api = NinjaAPI(
     title="EventOps API",
@@ -15,6 +16,7 @@ api = NinjaAPI(
 
 api.add_router("/events", events_router)
 api.add_router("/contacts", contacts_router)
+api.add_router("/sales", sales_router)
 
 
 @api.get("/me", tags=["auth"])

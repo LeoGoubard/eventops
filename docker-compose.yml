@@ -19,6 +19,7 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?copy .env.example to .env first}
       DEMO_PASSWORD: ${DEMO_PASSWORD:?copy .env.example to .env first}
       DJANGO_DEBUG: "true"
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
       DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost:8080
     command: >

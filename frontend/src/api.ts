@@ -16,6 +16,16 @@ export type EventItem = {
 
 export type Me = { username: string; role: "admin" | "organizer" | "host" | null };
 
+export type SalesLine = {
+  id: number;
+  name: string;
+  currency: string;
+  sales_count: number;
+  net_cents: number;
+};
+
+export type SalesSummary = { by_event: SalesLine[]; by_speaker: SalesLine[] };
+
 export class UnauthorizedError extends Error {}
 
 function csrfToken(): string {
@@ -37,6 +47,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const api = {
   me: () => request<Me>("/api/me"),
   events: () => request<EventItem[]>("/api/events/"),
+  salesSummary: () => request<SalesSummary>("/api/sales/summary"),
   toggleItem: (eventId: number, itemId: number, done: boolean) =>
     request<EventItem>(`/api/events/${eventId}/checklist/${itemId}`, {
       method: "PATCH",

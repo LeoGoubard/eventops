@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.events",
     "apps.contacts",
+    "apps.sales",
 ]
 
 MIDDLEWARE = [
@@ -79,3 +80,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Signing secret of the Stripe webhook endpoint (whsec_...). Empty disables the endpoint.
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")

@@ -16,6 +16,10 @@ def can_manage_events(user: AbstractBaseUser | AnonymousUser) -> bool:
     return get_role(user) in {Role.ADMIN, Role.ORGANIZER}
 
 
+def can_view_sales(user: AbstractBaseUser | AnonymousUser) -> bool:
+    return get_role(user) in {Role.ADMIN, Role.ORGANIZER}
+
+
 def can_export_contacts(user: AbstractBaseUser | AnonymousUser) -> bool:
     """Only admins can export the mailing list. Everyone else can only use it to send emails."""
     return get_role(user) == Role.ADMIN
